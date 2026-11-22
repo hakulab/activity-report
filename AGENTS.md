@@ -39,6 +39,6 @@ Each rule has one home, which other pages link to. Add to this file or `docs/` o
 Review the change and its affected callers against the convention docs, and check the tests in particular for a claim the fixtures do not exercise. A turn, a unit, and a day each have one owner, so a change that computes hours in two places needs a reason.
 
 [Nushell skill]: https://github.com/hakula139/plugins/blob/main/plugins/hakula-languages/skills/nushell/SKILL.md
-[devkit's CI guide]: https://github.com/hakula139/devkit/blob/v3/docs/ci.md
+[devkit's CI guide]: https://github.com/hakulab/devkit/blob/v3/docs/ci.md
 [Design]: docs/reference/design.md
 [RELEASING.md]: RELEASING.md
