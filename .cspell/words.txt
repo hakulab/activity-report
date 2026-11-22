@@ -3,6 +3,7 @@ devkit
 direnv
 glab
 hakula
+hakulab
 handback
 khal
 mktemp
