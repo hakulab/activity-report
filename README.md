@@ -1,6 +1,6 @@
 # activity-report
 
-[![CI](https://github.com/hakula139/activity-report/actions/workflows/ci.yml/badge.svg)](https://github.com/hakula139/activity-report/actions/workflows/ci.yml)
+[![CI](https://github.com/hakulab/activity-report/actions/workflows/ci.yml/badge.svg)](https://github.com/hakulab/activity-report/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Reconstruct what you worked on over a date range, with human and agent hours per project and task, from the transcripts that [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex/), and [OMP](https://omp.sh) keep on your machine.
@@ -16,13 +16,13 @@ Reconstruct what you worked on over a date range, with human and agent hours per
 Run it without installing:
 
 ```bash
-nix run github:hakula139/activity-report -- digest 2026-10-12
+nix run github:hakulab/activity-report -- digest 2026-10-12
 ```
 
 Or install it into your profile:
 
 ```bash
-nix profile install github:hakula139/activity-report
+nix profile install github:hakulab/activity-report
 ```
 
 The package wraps the command with `git` and `zstd`, so both are on its `PATH`. It covers `aarch64-darwin`, `aarch64-linux`, and `x86_64-linux`. Flakes must be enabled, as in `nix --extra-experimental-features 'nix-command flakes' run ...` on a stock install.
@@ -34,7 +34,7 @@ The first run may ask to allow the project's Cachix cache. Declining is fine, si
 Add the flake input and import the module:
 
 ```nix
-inputs.activity-report.url = "github:hakula139/activity-report";
+inputs.activity-report.url = "github:hakulab/activity-report";
 
 # In the Home Manager configuration
 imports = [ inputs.activity-report.homeModules.default ];
@@ -49,7 +49,7 @@ The module installs the command and links the skill into `~/.agents/skills` and 
 Home Manager creates these links for you. For a Nix-only installation, clone the repository and link the skill for the assistants that should use it:
 
 ```bash
-git clone https://github.com/hakula139/activity-report ~/.local/share/activity-report
+git clone https://github.com/hakulab/activity-report ~/.local/share/activity-report
 mkdir -p ~/.agents/skills "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills"
 ln -s ~/.local/share/activity-report/skills/activity-report ~/.agents/skills/activity-report
 ln -s ~/.local/share/activity-report/skills/activity-report "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/activity-report"

@@ -51,7 +51,7 @@
           runtimeInputs = runtimeInputs pkgs;
           meta = {
             description = "Report what you worked on from agent transcripts, with hours per project and task";
-            homepage = "https://github.com/hakula139/activity-report";
+            homepage = "https://github.com/hakulab/activity-report";
             license = lib.licenses.mit;
             platforms = lib.platforms.all;
           };
