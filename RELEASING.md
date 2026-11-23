@@ -1,6 +1,6 @@
 # Releasing
 
-Use the [release skill](https://github.com/hakula139/plugins/blob/main/plugins/hakula-workflow/skills/release/SKILL.md) with the contract below.
+Use the [release skill](https://github.com/hakulab/plugins/blob/main/plugins/hakula-workflow/skills/release/SKILL.md) with the contract below.
 
 ## Versioning
 
@@ -23,4 +23,4 @@ Transcript formats follow each assistant's own releases, so an assistant release
 
 Set `version` in `flake.nix` to the release number, update the changelog, and run the [verification block](AGENTS.md#verification). Mark changes to the stability surface with `!` in the conventional commit title.
 
-After publication, verify that `nix run github:hakula139/activity-report/vX.Y.Z -- --help` starts and prints the command's help.
+After publication, verify that `nix run github:hakulab/activity-report/vX.Y.Z -- --help` starts and prints the command's help.

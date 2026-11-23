@@ -46,7 +46,7 @@ def main [...rest: string] {
 # Print the agent sessions on this host for a range of local dates as JSON.
 #
 # Output field reference
-# https://github.com/hakula139/activity-report/blob/main/skills/activity-report/references/output.md
+# https://github.com/hakulab/activity-report/blob/main/skills/activity-report/references/output.md
 def "main digest" [
   from: string # First local date, as YYYY-MM-DD
   to?: string # Last local date, as YYYY-MM-DD, the first date by default
