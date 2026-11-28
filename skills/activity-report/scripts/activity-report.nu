@@ -10,6 +10,7 @@
 use ./config.nu [load]
 use ./days.nu [day]
 use ./repos.nu [repositories repository-map]
+use ./stores/agy.nu
 use ./stores/claude.nu
 use ./stores/codex.nu
 use ./stores/omp.nu
@@ -73,7 +74,10 @@ def "main digest" [
   let since = ($boundaries | first)
   let until = ($boundaries | last)
   let sessions = (
-    (claude sessions $cfg $since) ++ (codex sessions $cfg $since) ++ (omp sessions $cfg $since)
+    (agy sessions $cfg $since)
+    ++ (claude sessions $cfg $since)
+    ++ (codex sessions $cfg $since)
+    ++ (omp sessions $cfg $since)
   )
 
   let linked = ($sessions | link)

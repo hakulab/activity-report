@@ -20,7 +20,7 @@ Only units referenced by a requested day are included. A unit belongs to one att
 | Field     | Type           | Meaning                                                             |
 | --------- | -------------- | ------------------------------------------------------------------- |
 | `kind`    | string         | `prompt` or `run`.                                                  |
-| `tool`    | string         | Owner's assistant: `claude`, `codex`, or `omp`.                     |
+| `tool`    | string         | Owner's assistant (`agy`, `claude`, `codex`, or `omp`).             |
 | `session` | string         | Owner session's id.                                                 |
 | `cwd`     | string         | Owner session's working directory.                                  |
 | `repo`    | string or null | Repository holding `cwd`, or null outside a repository.             |
@@ -53,6 +53,6 @@ Each entry has these fields:
 
 A unit can have an entry on several days without repeating its text. Zero-time activity is retained. Days follow local civil midnights, including daylight-saving transitions.
 
-Human credit runs from a prompt to the end of its turn, plus `hours.reading_minutes`, cut short by the next prompt in any attended session and capped at `hours.max_minutes`. It belongs to the prompt's day. Headless sessions, sidechains, and directories matching `excluded_dirs` earn no human credit.
+Human credit runs from a prompt to the end of its turn, plus `hours.reading_minutes`, cut short by the next prompt in any attended session and capped at `hours.max_minutes`. It belongs to the prompt's day. Sessions identified as headless, sidechains, and directories matching `excluded_dirs` earn no human credit. The digest treats Antigravity CLI sessions with a recorded parent as unattended. Other agy transcripts can look the same in interactive and headless use, so their explicit user prompts receive human credit unless their directory is excluded.
 
 A turn ends at its first reply or last model output. Agent time stops at the earliest of that end, `hours.agent_max_minutes` after the start, and the last record before a gap longer than `hours.agent_idle_minutes`. It belongs to the turn's start day, even across midnight. Parallel delegates each add their own time to the owning unit.

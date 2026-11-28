@@ -13,6 +13,7 @@ def resolved [home: string]: nothing -> record {
   {
     excluded_dirs: []
     assistants: {
+      agy: ($home | path join ".gemini/antigravity-cli")
       claude: ($home | path join ".claude")
       codex: ($home | path join ".codex")
       omp: ($home | path join ".omp/agent")
@@ -47,8 +48,17 @@ def "test assistant directories come from the file, then a nonempty variable, th
   let set = {CLAUDE_CONFIG_DIR: "/home/u/claude", CODEX_HOME: "/home/u/codex"}
   let empty = {CLAUDE_CONFIG_DIR: "", CODEX_HOME: ""}
   let from_env = {claude: "/home/u/claude", codex: "/home/u/codex"}
-  let from_file = {claude: "/home/u/file", codex: "/home/u/codex"}
-  let file_config = {assistants: {claude: "/home/u/file"}}
+  let from_file = {
+    agy: "/home/u/agy"
+    claude: "/home/u/file"
+    codex: "/home/u/codex"
+  }
+  let file_config = {
+    assistants: {
+      agy: "/home/u/agy"
+      claude: "/home/u/file"
+    }
+  }
   let cases = [
     {
       name: "set"

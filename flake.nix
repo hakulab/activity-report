@@ -38,6 +38,7 @@
 
       runtimeInputs = pkgs: [
         pkgs.git
+        pkgs.sqlite
         pkgs.zstd
       ];
 

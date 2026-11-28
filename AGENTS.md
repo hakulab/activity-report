@@ -1,6 +1,6 @@
 # AGENTS.md: activity-report
 
-`activity-report` is a Nushell command and an agent skill that reconstruct what a person worked on over a date range, with human and agent hours per project and task, from the local transcripts of Claude Code, Codex, and OMP.
+`activity-report` is a Nushell command and an agent skill that reconstruct what a person worked on over a date range, with human and agent hours per project and task, from local assistant transcripts.
 
 ## Read before you edit
 

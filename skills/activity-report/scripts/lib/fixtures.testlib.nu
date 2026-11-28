@@ -266,6 +266,7 @@ export def digest-run [
         agent_idle_minutes: 30
       }
       assistants: {
+        agy: ($dir | path join "agy")
         claude: ($dir | path join "claude")
         codex: ($dir | path join "codex")
         omp: ($dir | path join "omp")

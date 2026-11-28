@@ -3,11 +3,11 @@
 [![CI](https://github.com/hakulab/activity-report/actions/workflows/ci.yml/badge.svg)](https://github.com/hakulab/activity-report/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Reconstruct what you worked on over a date range, with human and agent hours per project and task, from the transcripts that [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex/), and [OMP](https://omp.sh) keep on your machine.
+Reconstruct what you worked on over a date range, with human and agent hours per project and task, from the transcripts that [Google Antigravity CLI](https://antigravity.google/docs/cli-features) (`agy`), [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex/), and [OMP](https://omp.sh) keep on your machine.
 
 ## How it works
 
-`activity-report digest` reads the three transcript formats and prints one JSON document for a range of local dates. It links delegated work to the prompt that started it and estimates human and agent hours for each day. The [agent skill](skills/activity-report/SKILL.md) uses the prompts, replies, and working directories to group those hours by project and task.
+`activity-report digest` reads local transcripts and prints one JSON document for a range of local dates. Where transcripts identify a parent session, it links delegated work to the prompt that started it. It estimates human and agent hours for each day. The [agent skill](skills/activity-report/SKILL.md) uses the prompts, replies, and working directories to group those hours by project and task.
 
 ## Install
 
@@ -25,7 +25,7 @@ Or install it into your profile:
 nix profile install github:hakulab/activity-report
 ```
 
-The package wraps the command with `git` and `zstd`, so both are on its `PATH`. It covers `aarch64-darwin`, `aarch64-linux`, and `x86_64-linux`. Flakes must be enabled, as in `nix --extra-experimental-features 'nix-command flakes' run ...` on a stock install.
+The package puts `git`, `sqlite3`, and `zstd` on the command's `PATH`. It covers `aarch64-darwin`, `aarch64-linux`, and `x86_64-linux`. Flakes must be enabled, as in `nix --extra-experimental-features 'nix-command flakes' run ...` on a stock install.
 
 The first run may ask to allow the project's Cachix cache. Declining is fine, since the package builds from cache.nixos.org. Nix configurations can also use `overlays.default` to add `activity-report` to their own package set.
 
@@ -60,7 +60,7 @@ ln -s ~/.local/share/activity-report/skills/activity-report "${CLAUDE_CONFIG_DIR
 | `~/.agents/skills`                                          | Codex, OMP       |
 | `~/.claude/skills`, or `$CLAUDE_CONFIG_DIR/skills` when set | Claude Code, OMP |
 
-Link or copy the whole directory because Codex skips a `SKILL.md` that is itself a symlink. Start a new assistant session after linking.
+To invoke the skill from Antigravity CLI, include the home-relative path `.gemini/config/skills` in `programs.activity-report.skillDirectories` or link the skill under `~/.gemini/config/skills` manually. Link or copy the whole directory because Codex skips a `SKILL.md` that is itself a symlink. Start a new assistant session after linking.
 
 ## Configuration
 
@@ -81,6 +81,7 @@ my-project = ["personal"]
 | Key                        | Default                                | Meaning                                                                                          |
 | -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `excluded_dirs`            | `[]`                                   | Regexes matching session directories whose prompts earn no human hours, such as worker worktrees |
+| `assistants.agy`           | `~/.gemini/antigravity-cli`            | Antigravity CLI session store containing `brain/`                                                |
 | `assistants.claude`        | `$CLAUDE_CONFIG_DIR`, else `~/.claude` | Claude Code's state directory                                                                    |
 | `assistants.codex`         | `$CODEX_HOME`, else `~/.codex`         | Codex's state directory                                                                          |
 | `assistants.omp`           | `~/.omp/agent`                         | OMP's state directory                                                                            |
@@ -92,6 +93,8 @@ my-project = ["personal"]
 | `labels.projects`          | `{}`                                   | Labels of each project by repository directory name                                              |
 
 Assistant directories must be absolute or start with `~`, which expands without resolving symlinks. Set `assistants.claude` or `assistants.codex` in TOML to override its environment-derived default.
+
+If you keep Antigravity CLI sessions elsewhere, set `assistants.agy` to the directory containing `brain/`, or set `programs.activity-report.settings.assistants.agy` in Home Manager. Antigravity keeps shared configuration and skills under `~/.gemini/config`.
 
 All `hours` values must be integers. `reading_minutes` allows zero, and the other values must be positive.
 
@@ -124,7 +127,7 @@ activity-report config --config ./config.toml
 
 Treat a digest and a report as private, and redact paths, tokens, and conversation text before sharing either.
 
-The command writes no state. It holds no credentials, opens no network connections, and runs no commands from the assistant stores. `excluded_dirs` removes human hours from matching sessions, while their agent work remains in the digest, as a run or under the prompt that delegated to it.
+The command reads transcripts and session metadata locally. It holds no credentials, opens no network connections, and runs no commands from the assistant stores. `excluded_dirs` removes human hours from matching sessions, while their agent work remains in the digest, as a run or under the prompt that delegated to it.
 
 The [agent skill](skills/activity-report/SKILL.md) asks the assistant to run `git`, `gh`, `glab`, `vdirsyncer`, and `khal`. Those commands read the same machine and reach the forge and calendar the user is signed in to, so install the skill only where that access is intended.
 
@@ -137,6 +140,8 @@ The transcript formats change without notice. The digest is tested on Linux agai
 | Claude Code | 2.1.319 |
 | Codex       | 0.167.0 |
 | OMP         | 18.18.1 |
+
+Tests for Antigravity CLI use synthetic examples of the plaintext transcript format in version 1.5.18. The digest covers steps retained in those logs. Sessions available only as binary conversation files and steps removed during compaction are outside its coverage.
 
 A newer assistant can add a record kind this command ignores, so that activity then goes uncounted. If a report misses work you know happened, open an issue with the release tag or commit you run and the assistant's version.
 

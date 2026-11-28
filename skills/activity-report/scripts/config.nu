@@ -11,6 +11,7 @@
 const DEFAULTS = {
   excluded_dirs: []
   assistants: {
+    agy: "~/.gemini/antigravity-cli"
     claude: "~/.claude"
     codex: "~/.codex"
     omp: "~/.omp/agent"
@@ -29,6 +30,7 @@ const DEFAULTS = {
 
 def environment-assistants []: nothing -> record {
   {
+    agy: $DEFAULTS.assistants.agy
     claude: ($env.CLAUDE_CONFIG_DIR? | default --empty $DEFAULTS.assistants.claude)
     codex: ($env.CODEX_HOME? | default --empty $DEFAULTS.assistants.codex)
     omp: $DEFAULTS.assistants.omp

@@ -5,7 +5,10 @@
 # ==================================================================================================
 
 # A transcript may end in a partial line while its session is still being written.
-def read-transcript [file: string]: nothing -> list {
+export def read-transcript [
+  file: string
+  --skip-invalid # Keep valid objects even if a malformed line precedes them
+]: nothing -> list {
   let raw = if ($file | str ends-with ".zst") {
     ^zstd -dc $file
   } else {
@@ -27,14 +30,21 @@ def read-transcript [file: string]: nothing -> list {
     $raw
   }
 
-  try {
-    $text | from json --objects
-  } catch {
+  if $skip_invalid {
     $text
     | lines
-    | drop 1
-    | str join "\n"
-    | from json --objects
+    | each {|line| try { $line | from json } }
+    | where {|row| ($row | describe --detailed | get type) == "record" }
+  } else {
+    try {
+      $text | from json --objects
+    } catch {
+      $text
+      | lines
+      | drop 1
+      | str join "\n"
+      | from json --objects
+    }
   }
 }
 
@@ -86,20 +96,17 @@ def turns []: list -> list {
   | reverse
 }
 
-def read-session [cfg: record, tool: string, parse: closure, file: string]: nothing -> any {
-  let records = (read-transcript $file)
-  let session = (do $parse $records $file)
-
-  if $session == null {
-    return null
-  }
-
+# Add idle pauses from the original activity timestamps before projecting normalized turns.
+export def project-session [
+  cfg: record
+  tool: string
+  file: string
+  session: record
+  timestamps: list
+]: nothing -> record {
   let gap = ($cfg.hours.agent_idle_minutes * 1min)
   let pauses = (
-    $records
-    | get -o timestamp
-    | compact
-    | into datetime
+    $timestamps
     | sort
     | window 2
     | where {|w| ($w.1 - $w.0) > $gap }
@@ -117,6 +124,18 @@ def read-session [cfg: record, tool: string, parse: closure, file: string]: noth
     attended: ($session.attended and ($cfg.excluded_dirs | all {|p| $session.cwd !~ $p }))
     turns: ($events | turns)
   }
+}
+
+def read-session [cfg: record, tool: string, parse: closure, file: string]: nothing -> any {
+  let records = (read-transcript $file)
+  let session = (do $parse $records $file)
+
+  if $session == null {
+    return null
+  }
+
+  let timestamps = ($records | get -o timestamp | compact | into datetime)
+  project-session $cfg $tool $file $session $timestamps
 }
 
 def transcript-stem [file: string]: nothing -> string {
@@ -142,26 +161,9 @@ export def glob-under [dir: string, ...patterns: string]: nothing -> list<string
   }
 }
 
-# Read recent transcripts and their ancestor closure. The parser maps records and a file to
-# `id`, `cwd`, `attended`, `parent`, and `events`, or null to skip it.
-export def read-sessions [
-  cfg: record
-  since: datetime
-  tool: string
-  globs: list<string>
-  parse: closure
-]: nothing -> list {
-  let base = ($cfg.assistants | get $tool)
-  let files = (
-    glob-under $base ...$globs
-    | each {|file|
-      {
-        file: $file
-        stem: (transcript-stem $file)
-        modified: (ls $file | get 0.modified)
-      }
-    }
-  )
+# Load recent transcripts and their ancestor closure from `file` and `modified` rows.
+export def load-sessions [files: list, since: datetime, load: closure]: nothing -> list {
+  let files = ($files | insert stem {|row| transcript-stem $row.file })
   mut pending = ($files | where modified >= $since | uniq-by stem | get file)
   mut seen = []
   mut sessions = []
@@ -170,7 +172,7 @@ export def read-sessions [
     $seen = ($seen ++ ($pending | each {|file| transcript-stem $file }))
     let loaded = (
       $pending
-      | par-each --keep-order {|file| read-session $cfg $tool $parse $file }
+      | par-each --keep-order {|file| do $load $file }
       | compact
     )
     $sessions = ($sessions ++ $loaded)
@@ -196,4 +198,25 @@ export def read-sessions [
       $loaded | where {|s| (transcript-stem $s.transcript) == $stem } | get -o 0.transcript
     }
   }
+}
+
+# The parser maps records and a file to `id`, `cwd`, `attended`, `parent`, and `events`, or null.
+export def read-sessions [
+  cfg: record
+  since: datetime
+  tool: string
+  globs: list<string>
+  parse: closure
+]: nothing -> list {
+  let base = ($cfg.assistants | get $tool)
+  let files = (
+    glob-under $base ...$globs
+    | each {|file|
+      {
+        file: $file
+        modified: (ls $file | get 0.modified)
+      }
+    }
+  )
+  load-sessions $files $since {|file| read-session $cfg $tool $parse $file }
 }
